@@ -10,12 +10,12 @@ RUN set -eux; \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-#ENV WINE_VERSION=6.0.1~bullseye-1
-ENV WINE_VERSION=8.0.0~bullseye-1
+ENV WINE_VERSION=8.0.0.0~bullseye-1
 RUN set -eux; \
-  curl -L https://dl.winehq.org/wine-builds/winehq.key | apt-key add - \
+  curl -L https://dl.winehq.org/wine-builds/winehq.key | tee /etc/apt/trusted.gpg.d/winehq.asc \
   && echo "deb https://dl.winehq.org/wine-builds/debian/ bullseye main" > /etc/apt/sources.list.d/winehq.list \
   && apt-get update \
+  && apt-cache madison wine-stable:i386 \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --install-recommends \
   wine-stable-i386=${WINE_VERSION} wine-stable:i386=${WINE_VERSION} winehq-stable:i386=${WINE_VERSION} \
   && apt-get clean \
@@ -51,5 +51,7 @@ RUN set -eux; \
 
 WORKDIR /Data
 
+# WINEDEBUG fixme-all -all
+ENV WINEDEBUG=-all
 ENTRYPOINT [ "wine", "C:\\innosetup\\ISCC.exe"]
 CMD [ "" ]
