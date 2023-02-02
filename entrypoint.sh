@@ -15,7 +15,7 @@ EOF
 
 }
 _args=( "${@}" )
-case "${1}" in
+case "${1?Arg REQUIRED: inno|unpack}" in
   inno)
     exec wine "$(winepath -w "/wine/drive_c/inno/ISCC.exe")" "${_args[@]:1}"
     ;;

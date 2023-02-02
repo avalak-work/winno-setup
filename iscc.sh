@@ -5,9 +5,15 @@ set -eu
 # -i, --interactive                    Keep STDIN open even if not attached
 # -t, --tty                            Allocate a pseudo-TTY
 
+image=${IMAGE:-ghcr.io/avalak-work/winno-setup:latest}
+if [ "${ACTION:-update}" == "update" ]; then
+  echo "Pulling image: ${image}"
+  docker pull "${image}"
+fi
+
 docker run \
   --rm -it \
   -v "${PWD}":/Data \
   -u "$(id -u "${USER}")":"$(id -g "${USER}")" \
-  ghcr.io/avalak-work/winno-setup:latest \
+  "${image}" \
   "${@}"
