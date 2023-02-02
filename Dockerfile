@@ -1,6 +1,32 @@
 # Dockerfile
 # https://docker.github.io/engine/reference/builder/
 
+# Base loader
+FROM debian:bullseye AS loader
+RUN set -eux; \
+  sed -i -e 's/\(bullseye.*\)$/\1 non-free/' /etc/apt/sources.list \
+  && apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+  unzip unrar p7zip-full \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+WORKDIR /tmp/dist
+
+# https://innounp.sourceforge.net/
+FROM loader AS inno-unpack
+ADD https://altushost-swe.dl.sourceforge.net/project/innounp/innounp/innounp%200.50/innounp050.rar /tmp/innounp.rar
+RUN set -eux; \
+  cd /tmp/dist \
+  && unrar x -y /tmp/innounp.rar
+
+# https://portapps.io/app/innosetup-portable/
+FROM loader as inno-setup
+ADD https://github.com/portapps/innosetup-portable/releases/download/6.2.0-5/innosetup-portable-win32-6.2.0-5.7z /tmp/dist/innosetup.7z
+RUN set -eux; \
+  cd /tmp/dist \
+  && 7z x -y /tmp/dist/innosetup.7z
+
+# Main image
 FROM debian:bullseye
 RUN set -eux; \
   dpkg --add-architecture i386 \
@@ -42,16 +68,13 @@ ENV WINEPREFIX=/wine
 ENV WINEARCH=win32
 RUN wineboot --update && wineserver --wait
 
-ADD --chown=wineuser:wineuser https://github.com/portapps/innosetup-portable/releases/download/6.2.0-5/innosetup-portable-win32-6.2.0-5.7z /tmp/dist/innosetup.7z
-RUN set -eux; \
-  cd /tmp/ \
-  && 7z x -y /tmp/dist/innosetup.7z \
-  && cp -r app /wine/drive_c/innosetup \
-  && cd /Data && rm -rf /tmp/dist
+ADD ./entrypoint.sh /usr/bin/entrypoint.sh
+COPY --from=inno-unpack /tmp/dist /wine/drive_c/inno
+COPY --from=inno-setup /tmp/dist/app /wine/drive_c/inno
 
 WORKDIR /Data
 
 # WINEDEBUG fixme-all -all
 ENV WINEDEBUG=-all
-ENTRYPOINT [ "wine", "C:\\innosetup\\ISCC.exe"]
-CMD [ "" ]
+ENTRYPOINT [ "entrypoint.sh" ]
+CMD [  ]
