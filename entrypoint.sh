@@ -15,11 +15,11 @@ EOF
 
 }
 _args=( "${@}" )
-case "${1?Arg REQUIRED: inno|unpack}" in
-  inno)
+case "${1?Arg REQUIRED: i|iscc|u|unp|unpack}" in
+  i|iscc)
     exec wine "$(winepath -w "/wine/drive_c/inno/ISCC.exe")" "${_args[@]:1}"
     ;;
-  unpack)
+  u|unp|unpack)
     exec wine "$(winepath -w "/wine/drive_c/inno/innounp.exe")" "${_args[@]:1}"
     ;;
   help|*)

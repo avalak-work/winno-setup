@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 
-# --rm                             Automatically remove the container when it exits
+# --rm                                 Automatically remove the container when it exits
 # -i, --interactive                    Keep STDIN open even if not attached
 # -t, --tty                            Allocate a pseudo-TTY
 
