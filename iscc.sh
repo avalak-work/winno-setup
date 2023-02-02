@@ -6,7 +6,7 @@ set -eu
 # -t, --tty                            Allocate a pseudo-TTY
 
 image=${IMAGE:-ghcr.io/avalak-work/winno-setup:latest}
-if [ "${ACTION:-update}" == "update" ]; then
+if [ "${ACTION:-}" == "update" ]; then
   echo "Pulling image: ${image}"
   docker pull "${image}"
 fi
